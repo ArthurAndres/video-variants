@@ -1,0 +1,63 @@
+{
+  "speeds": [0.95, 1.00, 1.05, 1.10],
+
+  "colors": {
+    "neutral":       { "label": "Neutre",          "description": "Pas de modification couleur" },
+    "warm":          { "label": "Chaud",            "description": "Tons orange/doré" },
+    "cool":          { "label": "Froid",            "description": "Tons bleu/cyan" },
+    "contrast":      { "label": "Contraste",        "description": "Contraste renforcé" },
+    "vibrant":       { "label": "Vibrant",          "description": "Saturation forte" },
+    "matte":         { "label": "Mat",              "description": "Look mat cinéma" },
+    "bw":            { "label": "Noir & Blanc",     "description": "Désaturation totale" },
+    "teal_orange":   { "label": "Teal & Orange",    "description": "Look cinéma blockbuster" },
+    "sunset":        { "label": "Sunset",           "description": "Coucher de soleil" },
+    "clean":         { "label": "Clean",            "description": "Lumineux et net" },
+    "pastel":        { "label": "Pastel",           "description": "Couleurs pastel douces" },
+    "noir":          { "label": "Film Noir",        "description": "Dramatique sombre" },
+    "bleach":        { "label": "Bleach Bypass",    "description": "Désaturé contrasté" },
+    "cross_process": { "label": "Cross Process",    "description": "Vintage coloré" },
+    "hdr":           { "label": "HDR",              "description": "Simili HDR punchy" }
+  },
+
+  "hooks": {
+    "none": { "label": "Aucun",  "description": "Pas de hook" },
+    "text": { "label": "Texte",  "description": "Texte overlay sur les premières secondes" },
+    "zoom": { "label": "Zoom",   "description": "Zoom progressif intro" },
+    "crop": { "label": "Crop",   "description": "Recadrage décalé intro" }
+  },
+
+  "voices": {
+    "none":  { "label": "Aucune", "description": "Audio original" },
+    "pitch": { "label": "Pitch",  "description": "Changement tonalité", "factors": [0.97, 1.03, 1.05] },
+    "tts": {
+      "label": "Voix IA",
+      "description": "Remplacement par Edge TTS",
+      "voices_fr": [
+        { "id": "fr-FR-HenriNeural",   "gender": "homme",  "label": "Henri" },
+        { "id": "fr-FR-DeniseNeural",  "gender": "femme",  "label": "Denise" },
+        { "id": "fr-FR-AlainNeural",   "gender": "homme",  "label": "Alain" },
+        { "id": "fr-FR-EloiseNeural",  "gender": "femme",  "label": "Eloise" }
+      ]
+    }
+  },
+
+  "frames": {
+    "none":   { "label": "Aucun",  "description": "Pas de modification" },
+    "mirror": { "label": "Miroir", "description": "Retournement horizontal" },
+    "crop":   { "label": "Crop",   "description": "Micro-recadrage 3%" },
+    "both":   { "label": "Les deux", "description": "Miroir + crop" }
+  },
+
+  "models": {
+    "A": {
+      "label": "Sans audio",
+      "phases": [1, 2, 4],
+      "description": "Transformations visuelles uniquement"
+    },
+    "B": {
+      "label": "Avec audio",
+      "phases": [1, 2, 3, 4],
+      "description": "Transformations visuelles + audio"
+    }
+  }
+}

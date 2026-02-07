@@ -1,0 +1,31 @@
+# Env
+.env
+
+# Vidéos (ne pas commit les fichiers volumineux)
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# Output
+output/
+tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Node (si n8n local)
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

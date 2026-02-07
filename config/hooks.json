@@ -1,0 +1,29 @@
+{
+  "texts_fr": [
+    "Personne ne sait ça 👀",
+    "Attends la fin...",
+    "Le secret que personne ne dit 🤫",
+    "Tu vas pas en revenir",
+    "C'est INCROYABLE 🔥",
+    "J'aurais aimé savoir ça avant",
+    "Regarde bien 👇",
+    "90% des gens ignorent ça",
+    "La vérité sur...",
+    "Ça change TOUT"
+  ],
+
+  "texts_en": [
+    "Nobody talks about this 👀",
+    "Wait for it...",
+    "The secret nobody tells 🤫",
+    "You won't believe this",
+    "This is INSANE 🔥",
+    "I wish I knew this sooner",
+    "Watch carefully 👇",
+    "90% of people don't know this",
+    "The truth about...",
+    "This changes EVERYTHING"
+  ],
+
+  "_note": "Ces textes sont utilisés par render-hooks.sh en mode 'text'. Personnalise-les selon ta niche."
+}

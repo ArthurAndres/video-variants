@@ -1,0 +1,421 @@
+{
+  "name": "Video Variants - FFmpeg Render + Drive Upload",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video-variants",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook_receive",
+      "name": "Webhook - Receive JSON",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "jobId",
+              "name": "jobId",
+              "value": "={{ 'job_' + $now.format('yyyyMMdd_HHmmss') }}",
+              "type": "string"
+            },
+            {
+              "id": "driveFileId",
+              "name": "driveFileId",
+              "value": "={{ $json.body.driveFileId || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "title",
+              "name": "title",
+              "value": "={{ $json.body.title || 'Untitled' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "extract_inputs",
+      "name": "Extract Inputs & Create JobId",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json.jobId + '_' + $json.title }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "create_folder",
+      "name": "Create Job Folder in Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [760, 420],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CRED_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "merge_inputs_folder",
+      "name": "Merge Inputs + Folder",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [980, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "folderId",
+              "name": "folderId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "normalize_folderid",
+      "name": "Normalize FolderId",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { status: 'accepted', jobId: $json.jobId, folderId: $json.folderId, message: 'Job accepted - rendering variants with FFmpeg' } }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "respond_early",
+      "name": "Respond Early (HTTP 202)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1420, 120]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.driveFileId }}"
+        },
+        "options": {}
+      },
+      "id": "download_source",
+      "name": "Download Source from Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1420, 300],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CRED_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileName": "=/data/render-worker/tmp/{{ $json.jobId }}_source.mp4",
+        "dataPropertyName": "data"
+      },
+      "id": "save_source_to_disk",
+      "name": "Save Source to Disk",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first();\n\n// === CONFIG: Modify speeds and grades here ===\nconst speeds = [0.95, 1.00, 1.05, 1.10];\nconst grades = [\n  'neutral','warm','cool','contrast','vibrant',\n  'matte','bw','teal_orange','sunset','clean',\n  'pastel','noir','bleach','cross_process','hdr'\n];\n\nlet idx = 1;\nconst out = [];\n\nfor (const speed of speeds) {\n  for (const grade of grades) {\n    const speedTag = String(Math.round(speed * 100));\n    out.push({\n      json: {\n        jobId: input.json.jobId,\n        folderId: input.json.folderId,\n        driveFileId: input.json.driveFileId,\n        title: input.json.title,\n        variantId: String(idx).padStart(3, '0'),\n        speed: speed,\n        grade: grade,\n        outputFileName: `variant_${String(idx).padStart(3, '0')}_${grade}_${speedTag}.mp4`,\n        sourcePath: `/data/render-worker/tmp/${input.json.jobId}_source.mp4`\n      }\n    });\n    idx++;\n  }\n}\n\n// TEST MODE: uncomment next line to render only 3 variants\n// return out.slice(0, 3);\n\nreturn out; // 60 variants\n"
+      },
+      "id": "gen_variants",
+      "name": "Generate 60 Variant Combos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1880, 300]
+    },
+    {
+      "parameters": {
+        "options": { "reset": true }
+      },
+      "id": "split_batches",
+      "name": "Loop Over Variants",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [2100, 300]
+    },
+    {
+      "parameters": {
+        "command": "=/data/render-worker/render.sh \"{{ $json.sourcePath }}\" \"/data/render-worker/tmp/{{ $json.outputFileName }}\" {{ $json.speed }} {{ $json.grade }}"
+      },
+      "id": "render_ffmpeg",
+      "name": "Render Variant (FFmpeg)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [2320, 300]
+    },
+    {
+      "parameters": {
+        "filePath": "=/data/render-worker/tmp/{{ $json.outputFileName }}"
+      },
+      "id": "read_rendered_mp4",
+      "name": "Read Rendered MP4",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [2540, 300]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "data",
+        "name": "={{ $json.outputFileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.folderId }}"
+        },
+        "options": {}
+      },
+      "id": "upload_mp4_drive",
+      "name": "Upload MP4 to Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2760, 300],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CRED_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=rm -f \"/data/render-worker/tmp/{{ $json.outputFileName }}\""
+      },
+      "id": "cleanup_variant",
+      "name": "Cleanup Temp File",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [2980, 300]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "aggregate_all",
+      "name": "Aggregate All Results",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2320, 540]
+    },
+    {
+      "parameters": {
+        "command": "=rm -f \"/data/render-worker/tmp/{{ $json.jobId }}_source.mp4\""
+      },
+      "id": "cleanup_source",
+      "name": "Cleanup Source File",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [2540, 540]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst first = items[0]?.json || {};\n\nif (!first.jobId || !first.folderId) {\n  throw new Error('Missing jobId/folderId in completion summary');\n}\n\nconst summary = {\n  jobId: first.jobId,\n  folderId: first.folderId,\n  status: 'completed',\n  totalVariants: items.length,\n  timestamp: new Date().toISOString()\n};\n\nconst text = JSON.stringify(summary, null, 2);\n\nreturn [{\n  json: summary,\n  binary: {\n    done: {\n      data: Buffer.from(text).toString('base64'),\n      mimeType: 'application/json',\n      fileName: `${summary.jobId}_DONE.json`\n    }\n  }\n}];"
+      },
+      "id": "build_done",
+      "name": "Build DONE Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2760, 540]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "done",
+        "name": "={{ $json.jobId + '_DONE.json' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.folderId }}"
+        },
+        "options": {}
+      },
+      "id": "upload_done",
+      "name": "Upload DONE.json",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2980, 540],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CRED_ID",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Receive JSON": {
+      "main": [
+        [
+          { "node": "Extract Inputs & Create JobId", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Extract Inputs & Create JobId": {
+      "main": [
+        [
+          { "node": "Create Job Folder in Drive", "type": "main", "index": 0 },
+          { "node": "Merge Inputs + Folder", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Create Job Folder in Drive": {
+      "main": [
+        [
+          { "node": "Merge Inputs + Folder", "type": "main", "index": 1 }
+        ]
+      ]
+    },
+    "Merge Inputs + Folder": {
+      "main": [
+        [
+          { "node": "Normalize FolderId", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Normalize FolderId": {
+      "main": [
+        [
+          { "node": "Respond Early (HTTP 202)", "type": "main", "index": 0 },
+          { "node": "Download Source from Drive", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Download Source from Drive": {
+      "main": [
+        [
+          { "node": "Save Source to Disk", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Save Source to Disk": {
+      "main": [
+        [
+          { "node": "Generate 60 Variant Combos", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Generate 60 Variant Combos": {
+      "main": [
+        [
+          { "node": "Loop Over Variants", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Loop Over Variants": {
+      "main": [
+        [
+          { "node": "Render Variant (FFmpeg)", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Aggregate All Results", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Render Variant (FFmpeg)": {
+      "main": [
+        [
+          { "node": "Read Rendered MP4", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Read Rendered MP4": {
+      "main": [
+        [
+          { "node": "Upload MP4 to Drive", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Upload MP4 to Drive": {
+      "main": [
+        [
+          { "node": "Cleanup Temp File", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Cleanup Temp File": {
+      "main": [
+        [
+          { "node": "Loop Over Variants", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Aggregate All Results": {
+      "main": [
+        [
+          { "node": "Cleanup Source File", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Cleanup Source File": {
+      "main": [
+        [
+          { "node": "Build DONE Summary", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build DONE Summary": {
+      "main": [
+        [
+          { "node": "Upload DONE.json", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "versionId": "local-export-v2-render"
+}

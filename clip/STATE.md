@@ -4,13 +4,27 @@ Prompt de référence : `PROMPT_COMPLET_AUTONOME.md` (fourni par l'auteur en pi�
 Mode économique (section 20 bis) actif : épisodes 1 (0:00-1:28) / 2 (1:28-2:46) / 3 (2:46-4:01), rendu final 1280×720.
 
 ## Où on en est
-- Étape 1 terminée : (a) environnement + analyse du morceau (section 5.2).
-- Étape (b) terminée : étude de la vidéo de test (`etude_video_test.md`, planches dans `out/review/`) + `research_notes.md` (M0).
-- Étape (c) en partie faite : références en ligne récupérées (`sources.md`).
-- Décision de l'auteur : la CAVERNE DE PLATON est remplacée par L'ARRIVÉE DES ANUNNAKI → proposition dans `proposition_anunnaki.md` (à valider).
-- Enfant : pas de photo de l'auteur enfant ; l'auteur accepte une référence trouvée en ligne. Épreuve de profil d'après Badile (`tools/proof_child.py`, `out/review/proof_child_side.jpg`) : **à valider par l'auteur**.
-  La silhouette pleine tirée de ce dessin a échoué 3 fois (remplissage qui déborde) : abandonnée, les silhouettes en pied viendront des poses.
-- **En attente de l'auteur** : validation de l'enfant (Badile) et des Anunnaki ; `dessin_auteur.jpg` (son profil exact ne se trouve pas en ligne).
+- Étapes (a) à (d) faites : environnement, analyse, étude du test, références, **reconstruction 0:00-0:50** (`out/test_0-50s_v2.mp4`, hors git).
+- **ARRÊT (étape d)** : en attente du retour de l'auteur sur la reconstruction avant de continuer après 0:50.
+- Décisions de l'auteur : pas de `dessin_auteur.jpg` (« tu t'en passes ») ; enfant = Badile ; caverne de Platon remplacée par L'ARRIVÉE DES ANUNNAKI (`proposition_anunnaki.md`, réalisée 34,2-36,9 s).
+- Contrôles du rendu v2 : 61 coupes, 97 % à ±1 image d'un temps ou demi-temps (médiane 8 ms ; le test : 28 %), aucune fenêtre statique.
+
+## Pipeline de rendu (reprendre ici)
+1. `python3 tools/prep_masks.py` (détourages -> assets/masks) puis `python3 tools/prep_assets.py` (gravures -> assets/eng). Modèle YOLO : models/ (téléchargé auto).
+   Épreuve de l'enfant : `python3 tools/proof_child.py` AVANT prep_assets (child_profile en dépend).
+2. `python3 -m engine.render 0 50 out/x.mp4` (4 processus, ~17 img/s en 720p ; `--preview` = 640×360).
+3. Contrôles : `python3 tools/cuts.py out/x.mp4` ; planches : `python3 tools/sheet_video.py out/x.mp4 out/review/s.jpg t0 t1`.
+- Code : `engine/core.py` (horloge musicale, papier, ligne d'or), `engine/common.py` (dessin commun), `engine/engrave.py` (gravure A.3),
+  `engine/shots_a.py` (0-19,65 s), `shots_b.py` (19,65-40,8 s), `shots_c.py` (40,8-50 s), `engine/timeline.py` (plans calés sur les numéros de temps).
+- Sources des figures : Dürer (Adam, Ève), Masaccio (couple chassé, pied), Sourikov (enfant de dos), Badile (enfant de profil), coureur à la torche
+  (pélikè à figures rouges = Prométhée, porteurs), Discobole, David, Atlas, Antinoüs (statue), Parthénon, Création, sceau d'Adda, Shamash, Apkallu.
+- Échecs notés (règle des 3) : silhouette pleine de l'enfant (Badile) ; gros plan de la main d'Ève (Dürer regravé) -> remplacé par la main d'Adam (Michel-Ange) qui se tend vers le fruit ;
+  YOLO instable sur statues/fresques -> union multi-tailles + GrabCut ; soufflet illisible -> four qui respire.
+
+## Points faibles connus de la v2 (à reprendre selon le retour de l'auteur)
+- Chevelure de l'enfant (Badile) encore un peu « casque » ; Adam et Ève de Dürer en figures noires : la branche tenue par Adam fait une masse peu lisible.
+- Le noir qui se referme (16,5 s) se lit comme une tache ; le serpent caché (6 s) reste discret ; la forge est sage.
+- Pas encore de « texte »/titre, pas encore de motif récurrent calé sur les répétitions (après 0:50).
 
 ## Environnement (vérifié le 2026-09-27)
 - 4 cœurs, 15 Go de RAM, pas de GPU. Python 3.11, Node 22, ffmpeg 6.1.1.
@@ -50,7 +64,7 @@ Le test n'avait que 28 % de coupes à ±1 image (retard moyen +32 ms) ; objectif
 - `python3 tools/commons.py "requête"` / `python3 tools/fetch_commons.py 1920 prefixe:"File:…"` → recherche et téléchargement sur Commons.
 - `python3 tools/cuts.py video.mp4` → coupes détectées, écarts aux temps, fenêtres statiques.
 
-## Prochain pas exact
+## Prochain pas exact (après validation de 0:00-0:50)
 1. Validation de l'auteur : l'enfant d'après Badile ; les 3 plans des Anunnaki.
 2. `dessin_auteur.jpg` pour son profil et la statue du dessin (sinon : profil de marbre antique libre de droits pour la statue ; les plans du profil de l'auteur restent en attente).
 3. Reconstruire 0:00-0:50 (annexe B + corrections de `etude_video_test.md`), en commençant par le moteur commun et 0-20 s (qui dépend seulement de l'enfant et du profil de l'auteur), puis montrer le résultat et S'ARRÊTER.

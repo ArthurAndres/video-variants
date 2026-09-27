@@ -6,7 +6,8 @@ Mode économique (section 20 bis) actif : épisodes 1 (0:00-1:28) / 2 (1:28-2:46
 ## Où on en est
 - Étape 1 terminée : (a) environnement + analyse du morceau (section 5.2).
 - Étape (b) terminée : étude de la vidéo de test (`etude_video_test.md`, planches dans `out/review/`) + `research_notes.md` (M0).
-- **En attente de l'auteur** : fichiers manquants (ci-dessous) + décision sur la CAVERNE DE PLATON.
+- Étape (c) en partie faite : références en ligne récupérées (`sources.md`).
+- **En attente de l'auteur** : `dessin_auteur.jpg`, `enfant_ref.jpg` + décision sur la CAVERNE DE PLATON.
 
 ## Environnement (vérifié le 2026-09-27)
 - 4 cœurs, 15 Go de RAM, pas de GPU. Python 3.11, Node 22, ffmpeg 6.1.1.
@@ -14,16 +15,16 @@ Mode économique (section 20 bis) actif : épisodes 1 (0:00-1:28) / 2 (1:28-2:46
 - Skia renvoie du **BGRA** (vérifié) : inverser les canaux avant ffmpeg.
 - Banc d'essai (gravure plein écran à 1 ligne tous les 3 px + pipe x264 CRF 17, 1 cœur) : 16,8 img/s en 720p, 8,2 img/s en 1080p.
   Estimation brute : 4:01 en 720p = 7 230 images ≈ 7 min sur 1 cœur pour ce niveau de charge ; les vraies scènes seront plus lourdes, x4 cœurs en parallèle.
-- **Internet restreint** : seuls pypi, npm, GitHub passent. Wikimedia Commons, Met, Rijksmuseum, Smithsonian, Europeana, NASA et Google sont **bloqués (403)** par la politique réseau de l'environnement.
-  -> impossible de récupérer soi-même les références en ligne (Création d'Adam, Discobole, Atlas Farnèse, David, gravure d'ouroboros).
+- Réseau : Wikimedia (upload, commons) et Met ouverts par l'auteur. Wikimedia bride les gros originaux : utiliser les vignettes 1920 (voir `sources.md`).
 
 ## Fichiers reçus / manquants
 Reçus : MP3 complet (2 copies, audio décodé identique, md5 e2f3ae82…), `35_17.bvh`, `david_mask.npy`, `atlas_mask.npy`,
 4 images (planche de mains à l'encre, planche de mains vectorielles, gravure d'ouroboros, photo du David en contre-plongée).
 Vidéo de test reçue ensuite (`references/reference_test_0-50s.mp4`, audio calé à 0 ms sur le MP3).
 Rangés dans `references/` (hors git) : ouroboros_gravure.jpg (592×612), david_contreplongee.jpg (480×640, basse déf.), mains_planche_*.jpg, 35_17.bvh, *_mask.npy.
-**Manquants** : `dessin_auteur.jpg`, `enfant_ref.jpg`,
-les photos de l'Atlas Farnèse, du Discobole et des mains de Michel-Ange (les masques .npy sont là, mais sans leurs images source).
+Références en ligne récupérées (`references/web/hd/`, détail dans `sources.md`) : mains de la Création, Discobole (x2), Atlas Farnèse (x2), David en contre-plongée, ouroboros de Jennis.
+Les masques `*_mask.npy` de l'auteur sont grossiers (David de profil avec artefacts, Atlas informe) : détourages à refaire sur les nouvelles photos.
+**Manquants** : `dessin_auteur.jpg`, `enfant_ref.jpg`.
 
 ## Analyse du morceau — résultats (revalidés, écarts avec le prompt signalés)
 - Durée 241,19 s. **Tempo 137,5 BPM en moyenne, variable de ~135,2 à ~139,4 BPM** (jeu sans métronome).
@@ -43,10 +44,10 @@ Le test n'avait que 28 % de coupes à ±1 image (retard moyen +32 ms) ; objectif
 - `python3 tools/analyze.py` → `analysis/analysis.json`, `analysis/carte.png`, `analysis/mesures.md` (≈ 1 min 30).
 - `python3 tools/bench.py 1280 720` → banc d'essai du rendu.
 - `python3 tools/contact.py sortie.jpg t0 t1` → planche-contact de la vidéo de test (images extraites dans `references/test_frames/`, 2 img/s).
+- `python3 tools/commons.py "requête"` / `python3 tools/fetch_commons.py 1920 prefixe:"File:…"` → recherche et téléchargement sur Commons.
 - `python3 tools/cuts.py video.mp4` → coupes détectées, écarts aux temps, fenêtres statiques.
 
 ## Prochain pas exact
-1. Obtenir de l'auteur : `dessin_auteur.jpg`, `enfant_ref.jpg`, et soit les photos de référence (Atlas, Discobole, mains de Michel-Ange, David),
-   soit l'ouverture du réseau (upload.wikimedia.org, commons.wikimedia.org).
+1. Obtenir de l'auteur : `dessin_auteur.jpg`, `enfant_ref.jpg`.
 2. Réponse sur la CAVERNE DE PLATON.
 3. Reconstruire 0:00-0:50 (annexe B + corrections de `etude_video_test.md`), en commençant par le moteur commun et 0-20 s (qui dépend seulement de l'enfant et du profil de l'auteur), puis montrer le résultat et S'ARRÊTER.

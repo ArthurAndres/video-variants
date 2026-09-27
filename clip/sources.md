@@ -13,6 +13,14 @@ Usage : détourage, puis vectorisation et gravure (annexe A.3). Aucune image n'e
 | atlas_farnese_face.jpg | *Atlas Farnèse*, de face, globe bien lisible | File:Atlante Farnese (fronte) - Museo Archeologico Nazionale di Napoli.jpg | Simon Burchell | CC BY-SA 4.0 | 1920×2560 |
 | david_contreplongee.jpg | Michel-Ange, *David*, contre-plongée avec la voûte de l'Accademia | File:Michelangelo's David, Galleria dell'Accademia, Florence (26612184971).jpg | Dimitris Kamaras | CC BY 2.0 | 1920×2560 |
 | ouroboros_jennis.jpg | Lucas Jennis, *De Lapide Philosophico* (1625), ouroboros gravé | File:Ouroboros 1.jpg | Lucas Jennis | Domaine public | 815×832 |
+| cand/enf_badile_hd.jpg | Giovanni Badile, *Portrait d'un garçon de profil* (années 1440), sanguine | File:Giovanni Badile, Portrait of a Boy in Profile, 1440s, NGA 75790.jpg | National Gallery of Art | CC0 | 1920×2534 |
+| cand/enf_tiarini.jpg | Alessandro Tiarini, *Tête de garçon* (de face) | File:Alessandro Tiarini - Head of a boy - NMH 1089-1863 - Nationalmuseum.jpg | Nationalmuseum | Domaine public | 714×1000 |
+| cand/anu_adda_seal.jpg | Sceau d'Adda (akkadien, ~2300 av. J.-C.) : Inanna, Utu, Enki, Isimud | File:Adda Seal Akkadian Empire 2300 BC.jpg | Nic McPhee | CC BY-SA 2.0 | 1280×516 |
+| cand/anu_enki.jpg | Sceau d'Adda (autre prise de vue) | File:Ea (Babilonian) - EnKi (Sumerian).jpg | ? | Domaine public | 962×611 |
+| cand/anu_shamash_tablet.jpg | Tablette de Shamash (Sippar), disque solaire | File:Tablette de Shamash - relief avec inscription.jpg | Zunkir | CC BY-SA 4.0 | 1920×2764 |
+| cand/anu_apkallu_todd_hd.jpg | Apkallu à tête d'aigle, Nimrud (IXᵉ s. av. J.-C.) | File:Alabaster Bas-relief of Eagle-headed winged Apkallu holding a bucket and cone … 9th C. BC.jpg | Gary Todd | CC0 | 1920×2880 |
+
+Autres candidats vus et écartés : études de têtes d'enfants (Frye, Gandolfi, Gauguin, Lingée), silhouette découpée d'un garçon (Met), planches de Muybridge (nus d'enfants : écartées).
 
 Fournies par l'auteur (licence non vérifiée, usage personnel) : `references/ouroboros_gravure.jpg` (gravure utilisée dans le test), `references/david_contreplongee.jpg` (480×640), planches de mains.
 Les licences CC BY / BY-SA demandent de créditer l'auteur de la photo : à mettre dans la description de la vidéo si elle est diffusée.

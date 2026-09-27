@@ -4,7 +4,9 @@ Prompt de référence : `PROMPT_COMPLET_AUTONOME.md` (fourni par l'auteur en pi�
 Mode économique (section 20 bis) actif : épisodes 1 (0:00-1:28) / 2 (1:28-2:46) / 3 (2:46-4:01), rendu final 1280×720.
 
 ## Où on en est
-Étape 1 terminée : (a) environnement + (b) analyse du morceau (section 5.2). **Arrêt demandé par l'auteur ici.**
+- Étape 1 terminée : (a) environnement + analyse du morceau (section 5.2).
+- Étape (b) terminée : étude de la vidéo de test (`etude_video_test.md`, planches dans `out/review/`) + `research_notes.md` (M0).
+- **En attente de l'auteur** : fichiers manquants (ci-dessous) + décision sur la CAVERNE DE PLATON.
 
 ## Environnement (vérifié le 2026-09-27)
 - 4 cœurs, 15 Go de RAM, pas de GPU. Python 3.11, Node 22, ffmpeg 6.1.1.
@@ -18,7 +20,9 @@ Mode économique (section 20 bis) actif : épisodes 1 (0:00-1:28) / 2 (1:28-2:46
 ## Fichiers reçus / manquants
 Reçus : MP3 complet (2 copies, audio décodé identique, md5 e2f3ae82…), `35_17.bvh`, `david_mask.npy`, `atlas_mask.npy`,
 4 images (planche de mains à l'encre, planche de mains vectorielles, gravure d'ouroboros, photo du David en contre-plongée).
-**Manquants** : `reference_test_0-50s.mp4` (le .htm fourni est la page de conversation, pas la vidéo), `dessin_auteur.jpg`, `enfant_ref.jpg`,
+Vidéo de test reçue ensuite (`references/reference_test_0-50s.mp4`, audio calé à 0 ms sur le MP3).
+Rangés dans `references/` (hors git) : ouroboros_gravure.jpg (592×612), david_contreplongee.jpg (480×640, basse déf.), mains_planche_*.jpg, 35_17.bvh, *_mask.npy.
+**Manquants** : `dessin_auteur.jpg`, `enfant_ref.jpg`,
 les photos de l'Atlas Farnèse, du Discobole et des mains de Michel-Ange (les masques .npy sont là, mais sans leurs images source).
 
 ## Analyse du morceau — résultats (revalidés, écarts avec le prompt signalés)
@@ -31,12 +35,18 @@ les photos de l'Atlas Farnèse, du Discobole et des mains de Michel-Ange (les ma
   Répétitions : D revient 2 fois et E revient 3 fois ; le bloc des mesures 8-53 se rejoue à l'identique aux mesures 53-98 (cycle de ~79 s). C'est là que placer le motif récurrent.
 - Voix : repérage APPROXIMATIF, non fiable pour caler quoi que ce soit.
 
+## Règle de synchro (issue de l'étude du test)
+Le son commence 17 ms avant chaque temps de `temps_s` (qui marque le pic d'attaque). Chaque coupe tombe sur l'image `round((temps − 0,017) × 30)`.
+Le test n'avait que 28 % de coupes à ±1 image (retard moyen +32 ms) ; objectif ≥ 90 %, vérifié par `tools/cuts.py`.
+
 ## Commandes
 - `python3 tools/analyze.py` → `analysis/analysis.json`, `analysis/carte.png`, `analysis/mesures.md` (≈ 1 min 30).
 - `python3 tools/bench.py 1280 720` → banc d'essai du rendu.
+- `python3 tools/contact.py sortie.jpg t0 t1` → planche-contact de la vidéo de test (images extraites dans `references/test_frames/`, 2 img/s).
+- `python3 tools/cuts.py video.mp4` → coupes détectées, écarts aux temps, fenêtres statiques.
 
 ## Prochain pas exact
 1. Obtenir de l'auteur : la vidéo de test, `dessin_auteur.jpg`, `enfant_ref.jpg`, et soit les photos de référence (Atlas, Discobole, mains de Michel-Ange, David),
    soit l'ouverture du réseau (upload.wikimedia.org, commons.wikimedia.org).
-2. Étudier la vidéo de test (1 image toutes les 0,5 s, planche-contact) et `research_notes.md` (≈ 10 recherches).
-3. Poser la question de la CAVERNE DE PLATON, puis reconstruire 0:00-0:50 (annexe B).
+2. Réponse sur la CAVERNE DE PLATON.
+3. Reconstruire 0:00-0:50 (annexe B + corrections de `etude_video_test.md`), en commençant par le moteur commun et 0-20 s (qui dépend seulement de l'enfant et du profil de l'auteur), puis montrer le résultat et S'ARRÊTER.

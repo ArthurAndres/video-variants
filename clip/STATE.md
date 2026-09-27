@@ -46,7 +46,7 @@ Le test n'avait que 28 % de coupes à ±1 image (retard moyen +32 ms) ; objectif
 - `python3 tools/cuts.py video.mp4` → coupes détectées, écarts aux temps, fenêtres statiques.
 
 ## Prochain pas exact
-1. Obtenir de l'auteur : la vidéo de test, `dessin_auteur.jpg`, `enfant_ref.jpg`, et soit les photos de référence (Atlas, Discobole, mains de Michel-Ange, David),
+1. Obtenir de l'auteur : `dessin_auteur.jpg`, `enfant_ref.jpg`, et soit les photos de référence (Atlas, Discobole, mains de Michel-Ange, David),
    soit l'ouverture du réseau (upload.wikimedia.org, commons.wikimedia.org).
 2. Réponse sur la CAVERNE DE PLATON.
 3. Reconstruire 0:00-0:50 (annexe B + corrections de `etude_video_test.md`), en commençant par le moteur commun et 0-20 s (qui dépend seulement de l'enfant et du profil de l'auteur), puis montrer le résultat et S'ARRÊTER.

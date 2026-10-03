@@ -7,7 +7,7 @@ Pour chaque début de situation et chaque cadre :
 
 Statistiques, appariées par domaine (n = 12) :
 
-    K = delta(C1) - delta(C6)   contrôle de compétence, doit être > 0 avec t > 2
+    K = delta(C1) - delta(C6)   calibration du cadre, doit être > 0 avec t > 2
     S = delta(C2) - delta(C5)   S > 0 penchant « fondement intérieur »,
                                 S < 0 penchant « vérification publique »
 
@@ -15,10 +15,16 @@ Toute propriété propre aux deux mots apparaît avec des signes opposés dans
 chaque différence et s'annule exactement. On ne compare jamais deux phrases
 différentes.
 
+K et S sont lus avec le même instrument (même delta, même paire de mots) :
+K s'applique donc cadre par cadre. Un cadre qui rate K est écarté, jamais
+moyenné avec les autres. La preuve vient de l'accord sur S entre cadres
+calibrés lexicalement disjoints. On ne monte en taille que si tous ratent K.
+
 Usage :
     python measure.py --dry                      # faux scoreur, vérifie les maths
     python measure.py --model Qwen/Qwen2.5-0.5B
     python measure.py --model Qwen/Qwen2.5-0.5B --fallback Qwen/Qwen2.5-1.5B
+        (le repli ne sert que si aucun cadre ne passe K)
 """
 
 import argparse
@@ -60,7 +66,9 @@ CASES = list(TEMPLATES)
 FRAMES = [
     ("So the matter is", "settled", "open"),
     ("So I would call it", "right", "unproven"),
-    ("So the question is", "closed", "live"),
+    ("So the question is", "resolved", "unresolved"),  # remplace closed/live (polysémiques)
+    ("So that is", "decided", "undecided"),
+    ("So the answer is", "known", "unknown"),
 ]
 
 T_THRESHOLD = 2.0
@@ -159,7 +167,8 @@ class FakeScorer:
         base += 1.5 * _unit("wd", word, situation)                        # mot × domaine
         base += 1.0 * _unit("wf", word, frame)                            # mot × cadre
         base += self.noise * _unit("n", case, situation, word, frame)     # bruit
-        planted = {"C1": self.k, "C6": -self.k, "C2": self.s, "C5": -self.s}.get(case, 0.0) / 2
+        k = self.k.get(frame, 0.0) if isinstance(self.k, dict) else self.k
+        planted = {"C1": k, "C6": -k, "C2": self.s, "C5": -self.s}.get(case, 0.0) / 2
         return base + (planted if word in self.a_words else 0.0)
 
 
@@ -206,12 +215,17 @@ def report(name, res):
     for frame, r in res.items():
         km, _, kt = r["K"]
         sm, _, st = r["S"]
-        ok = "oui" if km > 0 and kt > T_THRESHOLD else "NON"
+        ok = "oui" if k_ok(r) else "NON — écarté"
         print(frame.ljust(24) + f"{km:+9.3f}{kt:+8.2f}{sm:+9.3f}{st:+8.2f}  {ok}")
 
 
-def k_passes(res):
-    return all(r["K"][0] > 0 and r["K"][2] > T_THRESHOLD for r in res.values())
+def k_ok(r):
+    return r["K"][0] > 0 and r["K"][2] > T_THRESHOLD
+
+
+def calibrated(res):
+    """Cadres qui passent K : les seuls dont S est lisible."""
+    return [f for f, r in res.items() if k_ok(r)]
 
 
 def to_json(res):
@@ -237,6 +251,14 @@ def dry():
                 if not good:
                     ok = False
                     print(f"  ÉCHEC {frame} {stat}: estimé {m:+.3f} (t={t:+.2f}), planté {true:+}")
+    # K planté sur certains cadres seulement : la sélection doit se faire cadre par cadre.
+    frames = [f for f, _, _ in FRAMES]
+    keep = frames[::2]
+    res = measure(FakeScorer({f: 2.0 for f in keep}, 0.8))
+    report(f"dry  K planté seulement sur {keep}", res)
+    if calibrated(res) != keep:
+        ok = False
+        print(f"  ÉCHEC sélection par cadre : {calibrated(res)} au lieu de {keep}")
     # Nuisances pures (aucun effet planté, aucun bruit) : K et S doivent valoir 0 exactement.
     res = measure(FakeScorer(0.0, 0.0, noise=0.0))
     for frame, r in res.items():
@@ -271,10 +293,13 @@ def main():
         res = measure(HFScorer(name))
         report(name, res)
         results[name] = to_json(res)
-        if k_passes(res):
-            print(f"\nK passe sur les trois cadres pour {name} : S est interprétable.")
+        keep = calibrated(res)
+        dropped = [f for f in res if f not in keep]
+        print(f"\nCadres calibrés (K > 0, t > {T_THRESHOLD}) : {keep or 'aucun'}")
+        print(f"Cadres écartés (K raté) : {dropped or 'aucun'}")
+        if keep:
             break
-        print(f"\nK échoue sur au moins un cadre pour {name} : ne pas interpréter S.")
+        print(f"Aucun cadre ne passe K pour {name} : taille supérieure.")
     if args.json:
         with open(args.json, "w") as f:
             json.dump(results, f, indent=1)
